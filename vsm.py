@@ -269,7 +269,8 @@ if __name__ == "__main__":
     proj = sys.argv[1]
     bug_report_path = sys.argv[2]
     code_base_path = sys.argv[3]
-    storage_path = os.path.join("./data/", proj)
+    storage_path = sys.argv[4]
+    storage_path = os.path.join(f"{storage_path}", proj)
     if not os.path.exists(os.path.join(storage_path, "code/")):
         os.makedirs(os.path.join(storage_path, "code/"))
     
