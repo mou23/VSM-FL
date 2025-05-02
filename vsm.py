@@ -213,9 +213,7 @@ def compute_similarity(text_data, bug_data):
     }
     sorted_similarity = dict(sorted(similarity_dict.items(), key=lambda item: item[1], reverse=True))
 
-    # Return top 500
-    top_k = 500
-    return dict(list(sorted_similarity.items())[:top_k])
+    return dict(list(sorted_similarity.items()))
 
 def evaluation(results, storage_path):
     
