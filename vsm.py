@@ -207,13 +207,15 @@ def compute_similarity(text_data, bug_data):
     index = SparseMatrixSimilarity(model[code_vecs], num_features=len(dct))
     bug_content = bug_data["content"]
     sims = index[dct.doc2bow(bug_content)]
-    sorted_files = sorted(range(len(sims)), key=lambda k: sims[k], reverse=True)
 
-    results = []
-    for i in sorted_files:
-        results.append(file_names[i])
+    similarity_dict = {
+        file_names[i]: float(sims[i]) for i in range(len(sims))
+    }
+    sorted_similarity = dict(sorted(similarity_dict.items(), key=lambda item: item[1], reverse=True))
 
-    return results[:500]
+    # Return top 500
+    top_k = 500
+    return dict(list(sorted_similarity.items())[:top_k])
 
 def evaluation(results, storage_path):
     
@@ -295,12 +297,19 @@ if __name__ == "__main__":
         start_time = time.time()
         print("compute similarities...")
         result = compute_similarity(code_data, bug)
-        results[bug["id"]] = {"results": result, "truth": [fp for fp in bug["fixed_files"]]}
+
+        bug_id = bug["id"]
+        bug_result = {
+            "id": bug_id,
+            "results": result,
+            "truth": [fp for fp in bug["fixed_files"]]
+        }
+        bug_file_path = os.path.join(storage_path, f"{bug_id}.json")
+        with open(bug_file_path, "w") as f:
+            json.dump(bug_result, f)
+    
         print("the time consuming is %f s" %(time.time() - start_time))
 
         # evaluation(results, storage_path)
-        # break
-
-    with open(os.path.join(storage_path, "results.json"), "w") as f:
-        json.dump(results, f)
+        break
 
