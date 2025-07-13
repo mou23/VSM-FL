@@ -225,7 +225,7 @@ def compute_similarity(text_data, bug_data):
     for i in sorted_files:
         results.append(file_names[i])
 
-    return results[:100]
+    return results
 
 def evaluation(results, storage_path):
     
