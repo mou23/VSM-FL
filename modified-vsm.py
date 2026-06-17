@@ -29,16 +29,8 @@ def text_processor(docs):
     processing_text = [word for word in preprocess_string(docs) if not word in STOPWORDS and len(word)>3]
     return processing_text
 
-def get_invalid_bug_ids(file_path):
-    invalid_bug_ids = []
-    with open(file_path, 'r') as file:
-        for line in file:
-            values = line.strip().split(',')
-            invalid_bug_ids.extend([str(value) for value in values])
-    print(invalid_bug_ids)
-    return invalid_bug_ids
 
-def bug_reader(bug_report_path, code_base_path, invalid_bug_file):
+def bug_reader(bug_report_path, code_base_path):
     bugs = []
 
     tree = ET.parse(bug_report_path)
@@ -69,10 +61,7 @@ def bug_reader(bug_report_path, code_base_path, invalid_bug_file):
     length = len(bugs)
     print('total bugs', length)
     
-    invalid_bug_ids = get_invalid_bug_ids(invalid_bug_file)
-    filtered_bugs = [bug for bug in bugs if bug['id'] not in invalid_bug_ids]
-    
-    return filtered_bugs
+    return bugs
 
 def error_handler(e):
     print(f"Error occurred: {e}")
@@ -271,8 +260,7 @@ if __name__ == "__main__":
     proj = sys.argv[1]
     bug_report_path = sys.argv[2]
     code_base_path = sys.argv[3]
-    invalid_bug_file = sys.argv[4]
-    storage_path = sys.argv[5]
+    storage_path = sys.argv[4]
     storage_path = os.path.join(f"{storage_path}", proj)
     if not os.path.exists(os.path.join(storage_path, "code/")):
         os.makedirs(os.path.join(storage_path, "code/"))
@@ -280,7 +268,7 @@ if __name__ == "__main__":
     results = {}
     start_time = time.time()
     print("read bug reports...")
-    bug_data = bug_reader(bug_report_path, code_base_path, invalid_bug_file)
+    bug_data = bug_reader(bug_report_path, code_base_path)
     print("the time consuming is %f s" %(time.time() - start_time))
 
     for bug in tqdm(bug_data):
