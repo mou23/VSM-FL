@@ -45,43 +45,34 @@ def bug_reader(bug_report_path, code_base_path, invalid_bug_file):
     root = tree.getroot()
    
     for element in root.findall(".//table"):
-        bug_id = element[1].text
-        summary = element[2].text or ''
-        description = element[3].text or ''
-        # print(bug_id, ',', summary, ',', description)
+        bug_id = element.find("column[@name='bug_id']").text
+        summary = element.find("column[@name='summary']").text or ''
+        description = element.find("column[@name='description']").text or ''
         bug_content = text_processor(summary + description)
-        fixed_commit_time = element[8].text
-        fixed_files = element[9].text.split('.java')
+        fixed_files = element.find("column[@name='files']").text.split('.java')
         fixed_files = [(file + '.java').strip() for file in fixed_files[:-1]]
 
         list_of_fixed_files = []
         for file_path in fixed_files:
             list_of_fixed_files.append(os.path.join(code_base_path, file_path))
 
-        buggy_commit = element[10].text
-        buggy_commit_time = element[11].text
+        buggy_commit = element.find("column[@name='commit']").text
         
         bug_data = {"id": bug_id,
                     "content": bug_content,
                     "buggy_commit": buggy_commit,
-                    "buggy_commit_time": buggy_commit_time,
-                    "fixed_commit_time": fixed_commit_time, 
                     "fixed_files": list_of_fixed_files}
         bugs.append(bug_data)
         print(list_of_fixed_files)
-    bugs = sorted(bugs, key=lambda d: d['fixed_commit_time'])
+
 
     length = len(bugs)
     print('total bugs', length)
-    starting_index = length - int(length*0.4)
-    new_bugs = bugs[starting_index:length]
     
     invalid_bug_ids = get_invalid_bug_ids(invalid_bug_file)
-    filtered_bugs = [bug for bug in new_bugs if bug['id'] not in invalid_bug_ids]
-
-    new_bugs = sorted(filtered_bugs, key=lambda d: d['buggy_commit_time'])
+    filtered_bugs = [bug for bug in bugs if bug['id'] not in invalid_bug_ids]
     
-    return new_bugs
+    return filtered_bugs
 
 def error_handler(e):
     print(f"Error occurred: {e}")
